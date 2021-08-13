@@ -1,6 +1,14 @@
+QBCore = nil
 local Categories = {}
 local Vehicles = {}
 local shopLoading = true
+
+TriggerEvent(
+	"QBCore:GetObject",
+	function(obj)
+		QBCore = obj
+	end
+)
 
 function RemoveOwnedVehicle(plate)
 	exports.ghmattimysql:execute(
@@ -11,41 +19,41 @@ function RemoveOwnedVehicle(plate)
 	)
 end
 
-MySQL.ready(
-	function()
-		Categories = MySQL.Sync.fetchAll("SELECT * FROM vehicle_categories ORDER BY label ASC")
-		local vehicles = MySQL.Sync.fetchAll("SELECT * FROM vehicles")
+(MySQL.ready(
+    function()
+        Categories = exports.ghmattimysql:executeSync("SELECT * FROM vehicle_categories ORDER BY label ASC")
+        local vehicles = exports.ghmattimysql:executeSync("SELECT * FROM vehicles")
 
-		for i = 1, #vehicles, 1 do
-			local vehicle = vehicles[i]
-			vehicle.loaded = false
+        for i = 1, #vehicles, 1 do
+            local vehicle = vehicles[i]
+            vehicle.loaded = false
 
-			for j = 1, #Categories, 1 do
-				if Categories[j].name == vehicle.category then
-					vehicle.categoryLabel = Categories[j].label
-					break
-				end
-			end
+            for j = 1, #Categories, 1 do
+                if Categories[j].name == vehicle.category then
+                    vehicle.categoryLabel = Categories[j].label
+                    break
+                end
+            end
 
-			if (vehicle.hash == "" or vehicle.hash == "0") then
-				vehicle.hash = GetHashKey(vehicle.model)
-				exports.ghmattimysql:execute(
-					"UPDATE vehicles SET hash = @hash WHERE model = @model",
-					{
-						["@hash"] = vehicle.hash,
-						["@model"] = vehicle.model
-					}
-				)
-			end
+            if (vehicle.hash == "" or vehicle.hash == "0") then
+                vehicle.hash = GetHashKey(vehicle.model)
+                exports.ghmattimysql:execute(
+                    "UPDATE vehicles SET hash = @hash WHERE model = @model",
+                    {
+                        ["@hash"] = vehicle.hash,
+                        ["@model"] = vehicle.model
+                    }
+                )
+            end
 
-			Vehicles[tostring(vehicle.hash)] = vehicle
-		end
+            Vehicles[tostring(vehicle.hash)] = vehicle
+        end
 
-		-- send information after db has loaded, making sure everyone gets vehicle information
-		TriggerClientEvent("otaku_vehicleshop:sendCategories", -1, Categories)
-		TriggerClientEvent("otaku_vehicleshop:sendVehicles", -1, Vehicles)
-		shopLoading = false
-	end
+        -- send information after db has loaded, making sure everyone gets vehicle information
+        TriggerClientEvent("otaku_vehicleshop:sendCategories", -1, Categories)
+        TriggerClientEvent("otaku_vehicleshop:sendVehicles", -1, Vehicles)
+        shopLoading = false
+    end
 )
 
 RegisterServerEvent("otaku_vehicleshop:setVehicleOwned")
@@ -53,7 +61,7 @@ AddEventHandler(
 	"otaku_vehicleshop:setVehicleOwned",
 	function(vehicleProps)
 		local _source = source
-		local xPlayer = QBCore.Functions.GetPlayer(_source)
+		local xPlayer = QBCore.Functions.GetPlayerByCitizenId(_source)
 
 		exports.ghmattimysql:execute(
 			"INSERT INTO owned_vehicles (owner, plate, vehicle, vehiclename) VALUES (@owner, @plate, @vehicle, @vehiclename)",
@@ -65,7 +73,7 @@ AddEventHandler(
 			},
 			function(rowsChanged)
 				TriggerClientEvent(
-					"esx:showAdvancedNotification",
+					"QBCore:Notify",
 					_source,
 					"Vehicle Registration",
 					_U("vehicle_belongs", vehicleProps.plate),
@@ -94,7 +102,7 @@ AddEventHandler(
 			},
 			function(rowsChanged)
 				TriggerClientEvent(
-					"esx:showAdvancedNotification",
+					"QBCore:Notify",
 					playerId,
 					"Vehicle Registration",
 					_U("vehicle_belongs", vehicleProps.plate),
@@ -153,6 +161,15 @@ QBCore.Functions.CreateCallback(
 		cb(Vehicles)
 	end
 )
+
+function Round(value, numDecimalPlaces)
+    if numDecimalPlaces then
+        local power = 10^numDecimalPlaces
+        return math.floor((value * power) + 0.5) / (power)
+    else
+        return math.floor(value + 0.5)
+    end
+end 
 
 QBCore.Functions.CreateCallback(
 	"otaku_vehicleshop:buyVehicle",

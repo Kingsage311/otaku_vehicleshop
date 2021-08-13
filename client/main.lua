@@ -7,7 +7,7 @@ local IsInShopMenu = false
 local Categories = {}
 local Vehicles = {}
 local SaleVehicles = {}
-
+QBCore = nil
 
 if Config.VehicleshopInterior then --Checks if Config.VehicleshopInterior is set to true/false
 	Citizen.CreateThread(
@@ -24,11 +24,11 @@ end
 
 Citizen.CreateThread(
 	function()
-		while ESX == nil do
+		while QBCore == nil do
 			TriggerEvent(
-				"esx:getSharedObject",
+				"QBCore:GetObject",
 				function(obj)
-					ESX = obj
+					QBCore = obj
 				end
 			)
 			Citizen.Wait(0)
@@ -121,7 +121,7 @@ RegisterNUICallback(
 						end
 					)
 				else
-					QBCore.Functions.Notify('Not Enough Money', 'error')
+					QBCore:Notify(_U("not_enough_money"))
 				end
 			end,
 			veh.model
@@ -253,7 +253,7 @@ AddEventHandler(
 	"otaku_vehicleshop:hasExitedMarker",
 	function(zone)
 		if not IsInShopMenu then
-			--ESX.UI.Menu.CloseAll()
+			ESX.UI.Menu.CloseAll()
 		end
 
 		CurrentAction = nil
@@ -265,7 +265,7 @@ AddEventHandler(
 	function(resource)
 		if resource == GetCurrentResourceName() then
 			if IsInShopMenu then
-				--ESX.UI.Menu.CloseAll()
+				ESX.UI.Menu.CloseAll()
 
 				local playerPed = PlayerPedId()
 				FreezeEntityPosition(playerPed, false)
@@ -397,9 +397,9 @@ Citizen.CreateThread(
 							function(vehicleSold)
 								if vehicleSold then
 									QBCore.Functions.DeleteVehicle(CurrentActionData.vehicle)
-									QBCore.Functions.Notify('Vehicle Sold', 'succsess')
+									QBCore:Notify(_U("vehicle_sold_for", CurrentActionData.label, GroupDigits(CurrentActionData.price)))
 								else
-									QBCore.Functions.Notify('You Don't Own This vehicle..', 'error')
+									QBCore:Notify("Vehicle Resell", "You dont own this Vehicle", "fas fa-exclamation", "red")
 								end
 							end,
 							CurrentActionData.plate,

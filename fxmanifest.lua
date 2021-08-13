@@ -5,7 +5,6 @@ author "Sojobo#0001"
 description "Otaku Vehicle Shop"
 version "1.1.0"
 
-dependency "es_extended"
 ui_page "html/ui.html"
 
 files {
@@ -17,15 +16,12 @@ files {
 }
 
 server_scripts {
-	"@mysql-async/lib/MySQL.lua",
-	"@es_extended/locale.lua",
 	"locales/*.lua",
 	"config.lua",
 	"server/main.lua"
 }
 
 client_scripts {
-	"@es_extended/locale.lua",
 	"locales/*.lua",
 	"config.lua",
 	"client/utils.lua",
@@ -35,4 +31,9 @@ client_scripts {
 exports {
 	"GeneratePlate",
 	"getVehicleData"
+}
+
+shared_scripts { 
+    '@qb-core/import.lua',
+    'config.lua'
 }

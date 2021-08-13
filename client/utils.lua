@@ -26,7 +26,7 @@ function GeneratePlate(permanent)
 			generatedPlate = string.upper(GetRandomLetter(4) .. GetRandomNumber(4))
 		end
 
-		ESX.TriggerServerCallback(
+		QBCore.Functions.TriggerCallback(
 			"otaku_vehicleshop:isPlateTaken",
 			function(isPlateTaken)
 				if not isPlateTaken then
@@ -47,7 +47,7 @@ end
 function IsPlateTaken(plate)
 	local callback = "waiting"
 
-	ESX.TriggerServerCallback(
+	QBCore.Functions.TriggerCallback(
 		"otaku_vehicleshop:isPlateTaken",
 		function(isPlateTaken)
 			callback = isPlateTaken
