@@ -3,12 +3,6 @@ local Categories = {}
 local Vehicles = {}
 local shopLoading = true
 
-TriggerEvent(
-	"QBCore:GetObject",
-	function(obj)
-		QBCore = obj
-	end
-)
 
 function RemoveOwnedVehicle(plate)
 	exports.ghmattimysql:execute(
