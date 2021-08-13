@@ -1,17 +1,9 @@
-ESX = nil
 local Categories = {}
 local Vehicles = {}
 local shopLoading = true
 
-TriggerEvent(
-	"esx:getSharedObject",
-	function(obj)
-		ESX = obj
-	end
-)
-
 function RemoveOwnedVehicle(plate)
-	MySQL.Async.execute(
+	exports.ghmattimysql:execute(
 		"DELETE FROM owned_vehicles WHERE plate = @plate",
 		{
 			["@plate"] = plate
@@ -37,7 +29,7 @@ MySQL.ready(
 
 			if (vehicle.hash == "" or vehicle.hash == "0") then
 				vehicle.hash = GetHashKey(vehicle.model)
-				MySQL.Async.execute(
+				exports.ghmattimysql:execute(
 					"UPDATE vehicles SET hash = @hash WHERE model = @model",
 					{
 						["@hash"] = vehicle.hash,
@@ -61,9 +53,9 @@ AddEventHandler(
 	"otaku_vehicleshop:setVehicleOwned",
 	function(vehicleProps)
 		local _source = source
-		local xPlayer = ESX.GetPlayerFromId(_source)
+		local xPlayer = QBCore.Functions.GetPlayer(_source)
 
-		MySQL.Async.execute(
+		exports.ghmattimysql:execute(
 			"INSERT INTO owned_vehicles (owner, plate, vehicle, vehiclename) VALUES (@owner, @plate, @vehicle, @vehiclename)",
 			{
 				["@owner"] = xPlayer.identifier,
@@ -90,9 +82,9 @@ RegisterServerEvent("otaku_vehicleshop:setVehicleOwnedPlayerId")
 AddEventHandler(
 	"otaku_vehicleshop:setVehicleOwnedPlayerId",
 	function(playerId, vehicleProps)
-		local xPlayer = ESX.GetPlayerFromId(playerId)
+		local xPlayer = QBCore.Functions.GetPlayer(playerId)
 
-		MySQL.Async.execute(
+		exports.ghmattimysql:execute(
 			"INSERT INTO owned_vehicles (owner, plate, vehicle, vehiclename) VALUES (@owner, @plate, @vehicle, @vehiclename)",
 			{
 				["@owner"] = xPlayer.identifier,
@@ -119,7 +111,7 @@ RegisterServerEvent("otaku_vehicleshop:addToList")
 AddEventHandler(
 	"otaku_vehicleshop:addToList",
 	function(target, model, plate)
-		local xPlayer, xTarget = ESX.GetPlayerFromId(source), ESX.GetPlayerFromId(target)
+		local xPlayer, xTarget = QBCore.Functions.GetPlayer(source), QBCore.Functions.GetPlayer(target)
 		local dateNow = os.date("%Y-%m-%d %H:%M")
 
 		if xPlayer.job.name ~= "cardealer" then
@@ -127,7 +119,7 @@ AddEventHandler(
 			return
 		end
 
-		MySQL.Async.execute(
+		exports.ghmattimysql:execute(
 			"INSERT INTO vehicle_sold (client, model, plate, soldby, date) VALUES (@client, @model, @plate, @soldby, @date)",
 			{
 				["@client"] = xTarget.getName(),
@@ -140,7 +132,7 @@ AddEventHandler(
 	end
 )
 
-ESX.RegisterServerCallback(
+QBCore.Functions.CreateCallback(
 	"otaku_vehicleshop:getCategories",
 	function(source, cb)
 		while shopLoading do
@@ -151,7 +143,7 @@ ESX.RegisterServerCallback(
 	end
 )
 
-ESX.RegisterServerCallback(
+QBCore.Functions.CreateCallback(
 	"otaku_vehicleshop:getVehicles",
 	function(source, cb)
 		while shopLoading do
@@ -162,10 +154,10 @@ ESX.RegisterServerCallback(
 	end
 )
 
-ESX.RegisterServerCallback(
+QBCore.Functions.CreateCallback(
 	"otaku_vehicleshop:buyVehicle",
 	function(source, cb, vehicleModel)
-		local xPlayer = ESX.GetPlayerFromId(source)
+		local xPlayer = QBCore.Functions.GetPlayer(source)
 		local vehicleData = nil
 
 		for k, v in pairs(Vehicles) do
@@ -189,7 +181,7 @@ ESX.RegisterServerCallback(
 	end
 )
 
-ESX.RegisterServerCallback(
+QBCore.Functions.CreateCallback(
 	"otaku_vehicleshop:resellVehicle",
 	function(source, cb, plate, model)
 		local resellPrice = 0
@@ -197,7 +189,7 @@ ESX.RegisterServerCallback(
 		-- calculate the resell price
 		for k, v in pairs(Vehicles) do
 			if GetHashKey(v.model) == model then
-				resellPrice = ESX.Math.Round(v.price / 100 * Config.ResellPercentage)
+				resellPrice = Round(v.price / 100 * Config.ResellPercentage)
 				break
 			end
 		end
@@ -207,9 +199,9 @@ ESX.RegisterServerCallback(
 			cb(false)
 		end
 
-		local xPlayer = ESX.GetPlayerFromId(source)
+		local xPlayer = QBCore.Functions.GetPlayer(source)
 
-		MySQL.Async.fetchAll(
+		exports.ghmattimysql.executeSync(
 			"SELECT * FROM owned_vehicles WHERE owner = @owner AND @plate = plate",
 			{
 				["@owner"] = xPlayer.identifier,
@@ -240,10 +232,10 @@ ESX.RegisterServerCallback(
 	end
 )
 
-ESX.RegisterServerCallback(
+QBCore.Functions.CreateCallback(
 	"otaku_vehicleshop:isPlateTaken",
 	function(source, cb, plate)
-		MySQL.Async.fetchAll(
+		exports.ghmattimysql.executeSync(
 			"SELECT * FROM owned_vehicles WHERE plate = @plate",
 			{
 				["@plate"] = plate
@@ -256,12 +248,12 @@ ESX.RegisterServerCallback(
 )
 
 if Config.PoliceJob then
-	ESX.RegisterServerCallback(
+	QBCore.Functions.CreateCallback(
 		"otaku_vehicleshop:retrieveJobVehicles",
 		function(source, cb, type)
-			local xPlayer = ESX.GetPlayerFromId(source)
+			local xPlayer = QBCore.Functions.GetPlayer(source)
 
-			MySQL.Async.fetchAll(
+			exports.ghmattimysql.executeSync(
 				"SELECT * FROM owned_vehicles WHERE owner = @owner AND type = @type AND job = @job",
 				{
 					["@owner"] = xPlayer.identifier,
@@ -279,9 +271,9 @@ if Config.PoliceJob then
 	AddEventHandler(
 		"otaku_vehicleshop:setJobVehicleState",
 		function(plate, state)
-			local xPlayer = ESX.GetPlayerFromId(source)
+			local xPlayer = QBCore.Functions.GetPlayer(source)
 
-			MySQL.Async.execute(
+			exports.ghmattimysql:execute(
 				"UPDATE owned_vehicles SET `stored` = @stored WHERE plate = @plate AND job = @job",
 				{
 					["@stored"] = state,

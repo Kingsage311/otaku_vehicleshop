@@ -7,7 +7,7 @@ local IsInShopMenu = false
 local Categories = {}
 local Vehicles = {}
 local SaleVehicles = {}
-ESX = nil
+
 
 if Config.VehicleshopInterior then --Checks if Config.VehicleshopInterior is set to true/false
 	Citizen.CreateThread(
@@ -34,14 +34,14 @@ Citizen.CreateThread(
 			Citizen.Wait(0)
 		end
 
-		ESX.TriggerServerCallback(
+		QBCore.Functions.TriggerCallback(
 			"otaku_vehicleshop:getCategories",
 			function(categories)
 				Categories = categories
 			end
 		)
 
-		ESX.TriggerServerCallback(
+		QBCore.Functions.TriggerCallback(
 			"otaku_vehicleshop:getVehicles",
 			function(vehicles)
 				Vehicles = vehicles
@@ -102,11 +102,11 @@ RegisterNUICallback(
 		local playerPed = PlayerPedId()
 		IsInShopMenu = false
 
-		ESX.TriggerServerCallback(
+		QBCore.Functions.TriggerCallback(
 			"otaku_vehicleshop:buyVehicle",
 			function(hasEnoughMoney)
 				if hasEnoughMoney then
-					ESX.Game.SpawnVehicle(
+					QBCore.Functions.SpawnVehicle(
 						veh.model,
 						Config.Zones.ShopOutside.Pos,
 						Config.Zones.ShopOutside.Heading,
@@ -114,14 +114,14 @@ RegisterNUICallback(
 							TaskWarpPedIntoVehicle(playerPed, vehicle, -1)
 
 							local newPlate = GeneratePlate(true)
-							local vehicleProps = ESX.Game.GetVehicleProperties(vehicle)
+							local vehicleProps = QBCore.Functions.GetVehicleProperties(vehicle)
 							vehicleProps.plate = newPlate
 							SetVehicleNumberPlateText(vehicle, newPlate)
 							TriggerServerEvent("otaku_vehicleshop:setVehicleOwned", vehicleProps)
 						end
 					)
 				else
-					ESX.ShowNotification(_U("not_enough_money"))
+					QBCore.Functions.Notify('Not Enough Money', 'error')
 				end
 			end,
 			veh.model
@@ -136,6 +136,28 @@ RegisterNUICallback(
 		IsInShopMenu = false
 	end
 )
+
+function Round(value, numDecimalPlaces)
+    if numDecimalPlaces then
+        local power = 10^numDecimalPlaces
+        return math.floor((value * power) + 0.5) / (power)
+    else
+        return math.floor(value + 0.5)
+    end
+end 
+
+function Trim(value)
+    if value then
+        return (string.gsub(value, "^%s*(.-)%s*$", "%1"))
+    else
+        return nil
+    end
+end 
+
+function GroupDigits(value)
+    local left,num,right = string.match(value,'^([^%d]*%d)(%d*)(.-)$')
+    return left..(num:reverse():gsub('(%d%d%d)','%1' .. _U('locale_digit_grouping_symbol')):reverse())..right
+end 
 
 function OpenShopMenu()
 	if not IsInShopMenu then
@@ -204,12 +226,12 @@ AddEventHandler(
 						end
 					end
 
-					resellPrice = ESX.Math.Round(vehicleData.price / 100 * Config.ResellPercentage)
+					resellPrice = Round(vehicleData.price / 100 * Config.ResellPercentage)
 					model = GetEntityModel(vehicle)
-					plate = ESX.Math.Trim(GetVehicleNumberPlateText(vehicle))
+					plate = Trim(GetVehicleNumberPlateText(vehicle))
 
 					CurrentAction = "resell_vehicle"
-					CurrentActionMsg = _U("sell_menu", vehicleData.name, ESX.Math.GroupDigits(resellPrice))
+					CurrentActionMsg = _U("sell_menu", vehicleData.name, GroupDigits(resellPrice))
 
 					CurrentActionData = {
 						vehicle = vehicle,
@@ -231,7 +253,7 @@ AddEventHandler(
 	"otaku_vehicleshop:hasExitedMarker",
 	function(zone)
 		if not IsInShopMenu then
-			ESX.UI.Menu.CloseAll()
+			--ESX.UI.Menu.CloseAll()
 		end
 
 		CurrentAction = nil
@@ -243,7 +265,7 @@ AddEventHandler(
 	function(resource)
 		if resource == GetCurrentResourceName() then
 			if IsInShopMenu then
-				ESX.UI.Menu.CloseAll()
+				--ESX.UI.Menu.CloseAll()
 
 				local playerPed = PlayerPedId()
 				FreezeEntityPosition(playerPed, false)
@@ -370,14 +392,14 @@ Citizen.CreateThread(
 					if CurrentAction == "shop_menu" then
 						OpenShopMenu()
 					elseif CurrentAction == "resell_vehicle" then
-						ESX.TriggerServerCallback(
+						QBCore.Functions.TriggerCallback(
 							"otaku_vehicleshop:resellVehicle",
 							function(vehicleSold)
 								if vehicleSold then
-									ESX.Game.DeleteVehicle(CurrentActionData.vehicle)
-									ESX.ShowNotification(_U("vehicle_sold_for", CurrentActionData.label, ESX.Math.GroupDigits(CurrentActionData.price)))
+									QBCore.Functions.DeleteVehicle(CurrentActionData.vehicle)
+									QBCore.Functions.Notify('Vehicle Sold', 'succsess')
 								else
-									ESX.ShowAdvancedNotification("Vehicle Resell", "You dont own this Vehicle", "fas fa-exclamation", "red")
+									QBCore.Functions.Notify('You Don't Own This vehicle..', 'error')
 								end
 							end,
 							CurrentActionData.plate,
