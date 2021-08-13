@@ -242,7 +242,7 @@ AddEventHandler(
 	"otaku_vehicleshop:hasExitedMarker",
 	function(zone)
 		if not IsInShopMenu then
-			ESX.UI.Menu.CloseAll()
+			SetNuiFocus(false, false)
 		end
 
 		CurrentAction = nil
@@ -254,7 +254,7 @@ AddEventHandler(
 	function(resource)
 		if resource == GetCurrentResourceName() then
 			if IsInShopMenu then
-				ESX.UI.Menu.CloseAll()
+				SetNuiFocus(false, false)
 
 				local playerPed = PlayerPedId()
 				FreezeEntityPosition(playerPed, false)
