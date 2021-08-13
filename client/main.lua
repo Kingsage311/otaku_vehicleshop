@@ -7,7 +7,7 @@ local IsInShopMenu = false
 local Categories = {}
 local Vehicles = {}
 local SaleVehicles = {}
-QBCore = nil
+
 
 if Config.VehicleshopInterior then --Checks if Config.VehicleshopInterior is set to true/false
 	Citizen.CreateThread(
@@ -28,7 +28,7 @@ Citizen.CreateThread(
 			function(categories)
 				Categories = categories
 			end
-		)
+		),
 
 		QBCore.Functions.TriggerCallback(
 			"otaku_vehicleshop:getVehicles",
@@ -43,7 +43,7 @@ Citizen.CreateThread(
 				end
 			end
 		)
-	end
+	end	
 )
 
 RegisterNetEvent("otaku_vehicleshop:sendCategories")
@@ -110,7 +110,7 @@ RegisterNUICallback(
 						end
 					)
 				else
-					QBCore:Notify(_U("not_enough_money"))
+					QBCore.Functions.Notify('Not Enough Money', 'error', 5000)
 				end
 			end,
 			veh.model
@@ -386,9 +386,9 @@ Citizen.CreateThread(
 							function(vehicleSold)
 								if vehicleSold then
 									QBCore.Functions.DeleteVehicle(CurrentActionData.vehicle)
-									QBCore:Notify(_U("vehicle_sold_for", CurrentActionData.label, GroupDigits(CurrentActionData.price)))
+									QBCore.Functions.Notify('Vehicle Sold', 'succsess', 5000) 
 								else
-									QBCore:Notify("Vehicle Resell", "You dont own this Vehicle", "fas fa-exclamation", "red")
+									QBCore.Functions.Notify('You dont own this Vehicle', 'error', 5000)
 								end
 							end,
 							CurrentActionData.plate,

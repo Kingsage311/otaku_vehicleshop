@@ -16,13 +16,13 @@ files {
 }
 
 server_scripts {
-	"locales/*.lua",
+	--"locales/*.lua",
 	"config.lua",
 	"server/main.lua"
 }
 
 client_scripts {
-	"locales/*.lua",
+	--"locales/*.lua",
 	"config.lua",
 	"client/utils.lua",
 	"client/main.lua"

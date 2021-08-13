@@ -1,5 +1,5 @@
 Config = {}
-Config.Locale = "en"
+--Config.Locale = "en"
 Config.VehicleshopInterior = false -- Set this to true if the vehicleshop interior does not load!
 Config.PoliceJob = false -- Set this to true if you want otaku_vehicleshop to be compatible with esx_policejob! remember that you do need to edit policejob to use otaku_vehicleshop instead of esx_vehicleshop
 Config.DrawDistance = 100.0
