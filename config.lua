@@ -14,7 +14,7 @@ Config.Zones = {
 		Type = 36
 	},
 	ShopOutside = {
-		Pos = {x = -28.637, y = -1085.691, z = 25.565},
+		Pos = vector3(-28.637, -1085.691, 25.565),
 		Size = {x = 1.5, y = 1.5, z = 1.0},
 		Heading = 330.0,
 		Type = -1

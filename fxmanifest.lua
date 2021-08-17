@@ -37,3 +37,7 @@ shared_scripts {
     '@qb-core/import.lua',
     'config.lua'
 }
+
+dependencies {
+	'qb-core'
+}

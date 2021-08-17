@@ -22,29 +22,23 @@ if Config.VehicleshopInterior then --Checks if Config.VehicleshopInterior is set
 	)
 end
 
-Citizen.CreateThread(
-		QBCore.Functions.TriggerCallback(
-			"otaku_vehicleshop:getCategories",
-			function(categories)
-				Categories = categories
-			end
-		),
+Citizen.CreateThread( function()
+	QBCore.Functions.TriggerCallback("otaku_vehicleshop:getCategories", function(categories)
+			Categories = categories
+	end)
 
-		QBCore.Functions.TriggerCallback(
-			"otaku_vehicleshop:getVehicles",
-			function(vehicles)
-				Vehicles = vehicles
+	QBCore.Functions.TriggerCallback("otaku_vehicleshop:getVehicles", function(vehicles)
+		Vehicles = vehicles
+		SaleVehicles = {}
 
-				SaleVehicles = {}
-				for k, v in pairs(vehicles) do
-					if v.instore then
-						table.insert(SaleVehicles, v)
-					end
-				end
+		for k, v in pairs(vehicles) do
+			if v.instore then
+				table.insert(SaleVehicles, v)
 			end
-		)
-	end	
-)
+		end
+	end)
+end)
+
 
 RegisterNetEvent("otaku_vehicleshop:sendCategories")
 AddEventHandler(
@@ -82,41 +76,29 @@ function StartShopRestriction()
 	)
 end
 
-RegisterNUICallback(
-	"BuyVehicle",
-	function(data, cb)
-		SetNuiFocus(false, false)
+RegisterNUICallback("BuyVehicle", function(data, cb)    
+    SetNuiFocus(false, false)
+    local veh = data.vehicle
+    local playerPed = PlayerPedId()
+    IsInShopMenu = false
 
-		local veh = data.vehicle
-		local playerPed = PlayerPedId()
-		IsInShopMenu = false
-
-		QBCore.Functions.TriggerCallback(
-			"otaku_vehicleshop:buyVehicle",
-			function(hasEnoughMoney)
-				if hasEnoughMoney then
-					QBCore.Functions.SpawnVehicle(
-						veh.model,
-						Config.Zones.ShopOutside.Pos,
-						Config.Zones.ShopOutside.Heading,
-						function(vehicle)
-							TaskWarpPedIntoVehicle(playerPed, vehicle, -1)
-
-							local newPlate = GeneratePlate(true)
-							local vehicleProps = QBCore.Functions.GetVehicleProperties(vehicle)
-							vehicleProps.plate = newPlate
-							SetVehicleNumberPlateText(vehicle, newPlate)
-							TriggerServerEvent("otaku_vehicleshop:setVehicleOwned", vehicleProps)
-						end
-					)
-				else
-					QBCore.Functions.Notify('Not Enough Money', 'error', 5000)
-				end
-			end,
-			veh.model
-		)
-	end
-)
+    QBCore.Functions.TriggerCallback("otaku_vehicleshop:buyVehicle", function(hasEnoughMoney)
+        if hasEnoughMoney then
+            QBCore.Functions.SpawnVehicle(veh.model, function(vehicle)
+                TaskWarpPedIntoVehicle(playerPed, vehicle, -1)
+                local newPlate = string.upper(GetRandomLetter(3) .. " " .. GetRandomNumber(4))
+                local vehicleProps = QBCore.Functions.GetVehicleProperties(vehicle)
+                vehicleProps.plate = newPlate
+                SetVehicleNumberPlateText(vehicle, newPlate)
+				print("working")
+                TriggerServerEvent("otaku_vehicleshop:setVehicleOwned", vehicleProps)
+				print("worked")
+            end, Config.Zones.ShopOutside.Pos, true)
+        else
+            QBCore.Functions.Notify('Not Enough Money', 'error', 5000)
+        end
+    end, veh.model)
+end)
 
 RegisterNUICallback(
 	"CloseMenu",
@@ -145,7 +127,7 @@ end
 
 function GroupDigits(value)
     local left,num,right = string.match(value,'^([^%d]*%d)(%d*)(.-)$')
-    return left..(num:reverse():gsub('(%d%d%d)','%1' .. _U('locale_digit_grouping_symbol')):reverse())..right
+    return left..(num:reverse():gsub('(%d%d%d)','%1' .. ','):reverse())..right
 end 
 
 function OpenShopMenu()
@@ -195,7 +177,7 @@ AddEventHandler(
 	function(zone)
 		if zone == "ShopEntering" then
 			CurrentAction = "shop_menu"
-			CurrentActionMsg = _U("shop_menu")
+			CurrentActionMsg = "press ~INPUT_CONTEXT~ to access the menu"
 			CurrentActionData = {}
 
 			AddTextEntry(GetCurrentResourceName(), CurrentActionMsg)
@@ -276,7 +258,7 @@ Citizen.CreateThread(
 		SetBlipAsShortRange(blip, true)
 
 		BeginTextCommandSetBlipName("STRING")
-		AddTextComponentString(_U("car_dealer"))
+		AddTextComponentString("Car Dealer")
 		EndTextCommandSetBlipName(blip)
 	end
 )

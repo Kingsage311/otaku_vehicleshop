@@ -1,4 +1,3 @@
-QBCore = nil
 local Categories = {}
 local Vehicles = {}
 local shopLoading = true
@@ -33,38 +32,31 @@ Citizen.CreateThread(function()
 end)
 
 function RemoveOwnedVehicle(plate)
-    exports.ghmattimysql:execute("DELETE FROM owned_vehicles WHERE plate = @plate", { ["@plate"] = plate } )
+    exports.ghmattimysql:execute("DELETE FROM player_vehicles WHERE plate = @plate", { ["@plate"] = plate } )
 end
 
 RegisterServerEvent("otaku_vehicleshop:setVehicleOwned")
-AddEventHandler(
-	"otaku_vehicleshop:setVehicleOwned",
-	function(vehicleProps)
-		local _source = source
-		local xPlayer = QBCore.Functions.GetPlayerByCitizenId(_source)
+AddEventHandler("otaku_vehicleshop:setVehicleOwned", function(vehicleProps)
+	local xPlayer = QBCore.Functions.GetPlayer(source)
+	local vehiclename = Vehicles[tostring(vehicleProps.model)].name
+	print(vehiclename)
+	print(xPlayer)
 
-		exports.ghmattimysql:execute(
-			"INSERT INTO owned_vehicles (owner, plate, vehicle, vehiclename) VALUES (@owner, @plate, @vehicle, @vehiclename)",
-			{
-				["@owner"] = xPlayer.identifier,
-				["@plate"] = vehicleProps.plate,
-				["@vehicle"] = json.encode(vehicleProps),
-				["@vehiclename"] = Vehicles[tostring(vehicleProps.model)].name
-			},
-			function(rowsChanged)
-				TriggerClientEvent(
-					"QBCore:Notify",
-					_source,
-					"Vehicle Registration",
-					_U("vehicle_belongs", vehicleProps.plate),
-					"fas fa-car",
-					"green",
-					3
-				)
-			end
-		)
-	end
-)
+	exports.ghmattimysql:execute('INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, state) VALUES (@license, @citizenid, @vehicle, @hash, @mods, @plate, @state)',
+	{
+		['@license'] = xPlayer.PlayerData.license,
+		['@citizenid'] = xPlayer.PlayerData.citizenid,
+		['@vehicle'] = string.lower(vehicleName),
+		['@hash'] = GetHashKey(Vehicles[tostring(vehicleProps.model)].name),
+		['@mods'] = json.encode(vehicleProps),
+		['@plate'] = vehicleProps.plate,
+		['@state'] = 0
+
+	},
+	function(rowsChanged)
+		TriggerClientEvent('QBCore:Notify', -1, "A vehicle with plate: " .. vehicleProps.plate .. " now belongs to you!")
+	end)
+end)
 
 RegisterServerEvent("otaku_vehicleshop:setVehicleOwnedPlayerId")
 AddEventHandler(
@@ -164,13 +156,8 @@ QBCore.Functions.CreateCallback(
 			end
 		end
 
-		if not vehicleData.instore then -- SABS time.
-		-- Place your automated banning system here, if you have one
-		-- exports["sabs"]:banPlayer(source, "Exploiting #100 (" .. vehicleModel .. ")")
-		end
-
-		if xPlayer.getAccount("bank").money >= vehicleData.price then
-			xPlayer.removeAccountMoney("bank", vehicleData.price)
+		if xPlayer.PlayerData.money["bank"] >= vehicleData.price then
+			xPlayer.Functions.RemoveMoney("bank", vehicleData.price, "vehicle-bought-in-showroom")
 			cb(true)
 		else
 			cb(false)
@@ -229,20 +216,11 @@ QBCore.Functions.CreateCallback(
 	end
 )
 
-QBCore.Functions.CreateCallback(
-	"otaku_vehicleshop:isPlateTaken",
-	function(source, cb, plate)
-		exports.ghmattimysql.executeSync(
-			"SELECT * FROM owned_vehicles WHERE plate = @plate",
-			{
-				["@plate"] = plate
-			},
-			function(result)
-				cb(result[1] ~= nil)
-			end
-		)
-	end
-)
+QBCore.Functions.CreateCallback("otaku_vehicleshop:isPlateTaken", function(source, cb, plate)
+	exports.ghmattimysql.executeSync("SELECT * FROM owned_vehicles WHERE plate = @plate", { ["@plate"] = plate } ,function(result)
+		cb(result[1] ~= nil)
+	end)
+end)
 
 if Config.PoliceJob then
 	QBCore.Functions.CreateCallback(
