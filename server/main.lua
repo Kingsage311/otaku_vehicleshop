@@ -38,9 +38,7 @@ end
 RegisterServerEvent("otaku_vehicleshop:setVehicleOwned")
 AddEventHandler("otaku_vehicleshop:setVehicleOwned", function(vehicleProps)
 	local xPlayer = QBCore.Functions.GetPlayer(source)
-	local vehiclename = Vehicles[tostring(vehicleProps.model)].name
-	print(vehiclename)
-	print(xPlayer)
+	local vehicleName = Vehicles[tostring(vehicleProps.model)].name
 
 	exports.ghmattimysql:execute('INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, state) VALUES (@license, @citizenid, @vehicle, @hash, @mods, @plate, @state)',
 	{
@@ -264,38 +262,3 @@ if Config.PoliceJob then
 		end
 	)
 end
-
-Citizen.CreateThread(
-	function()
-		local vRaw = LoadResourceFile(GetCurrentResourceName(), "version.json")
-		if vRaw and Config.VersionCheck then
-			local v = json.decode(vRaw)
-			PerformHttpRequest(
-				"https://raw.githubusercontent.com/Sojobo/otaku_vehicleshop/main/version.json",
-				function(code, res, headers)
-					if code == 200 then
-						local rv = json.decode(res)
-						if rv.version ~= v.version then
-							print(
-								([[^1
-
--------------------------------------------------------
-otaku_vehicleshop
-UPDATE: %s AVAILABLE
-CHANGELOG: %s
--------------------------------------------------------
-^0]]):format(
-									rv.version,
-									rv.changelog
-								)
-							)
-						end
-					else
-						print("otaku_vehicleshop was unable to check version")
-					end
-				end,
-				"GET"
-			)
-		end
-	end
-)
