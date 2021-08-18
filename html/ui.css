@@ -81,6 +81,9 @@ body {
 
 .selected {
     font-weight: 800;
+    background-color: #0085B2;
+    padding-bottom: 4px;
+    
 }
 
 .showCaseBox {
