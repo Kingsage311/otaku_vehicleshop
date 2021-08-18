@@ -90,9 +90,7 @@ RegisterNUICallback("BuyVehicle", function(data, cb)
                 local vehicleProps = QBCore.Functions.GetVehicleProperties(vehicle)
                 vehicleProps.plate = newPlate
                 SetVehicleNumberPlateText(vehicle, newPlate)
-				print("working")
                 TriggerServerEvent("otaku_vehicleshop:setVehicleOwned", vehicleProps)
-				print("worked")
             end, Config.Zones.ShopOutside.Pos, true)
         else
             QBCore.Functions.Notify('Not Enough Money', 'error', 5000)
