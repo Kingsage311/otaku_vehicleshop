@@ -19,9 +19,8 @@ Config.PoliceJob = false Set this to true if you want esx_policejob to work corr
 
 To run otaku_vehicleshop you will need to be using the following resources;
 
-- es_extended
-- mysql-async
-
+- QBCore framework https://github.com/qbcore-framework
+- 
 ## Download & Installation
 
 - Import otaku_vehicleshop.sql in your database
