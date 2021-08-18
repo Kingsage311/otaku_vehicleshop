@@ -35,7 +35,7 @@ INSERT INTO `vehicle_categories` (`name`, `label`) VALUES
 	('sportsclassics', 'Sports Classics'),
 	('suvs', 'SUVs'),
 	('vans', 'Vans'),
-	('vips', 'Super');
+	('super', 'Super');
 /*!40000 ALTER TABLE `vehicle_categories` ENABLE KEYS */;
 
 -- ALTER TABLE `owned_vehicles`
