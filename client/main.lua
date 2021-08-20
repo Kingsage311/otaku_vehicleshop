@@ -90,6 +90,7 @@ RegisterNUICallback("BuyVehicle", function(data, cb)
                 local vehicleProps = QBCore.Functions.GetVehicleProperties(vehicle)
                 vehicleProps.plate = newPlate
                 SetVehicleNumberPlateText(vehicle, newPlate)
+				TriggerEvent('vehiclekeys:client:SetOwner')
                 TriggerServerEvent("otaku_vehicleshop:setVehicleOwned", vehicleProps)
             end, Config.Zones.ShopOutside.Pos, true)
         else
