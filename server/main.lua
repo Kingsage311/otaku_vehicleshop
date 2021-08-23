@@ -63,7 +63,7 @@ AddEventHandler(
 		local xPlayer = QBCore.Functions.GetPlayer(playerId)
 
 		exports.ghmattimysql:execute(
-			"INSERT INTO owned_vehicles (owner, plate, vehicle, vehiclename) VALUES (@owner, @plate, @vehicle, @vehiclename)",
+			"INSERT INTO player_vehicles (owner, plate, vehicle, vehiclename) VALUES (@owner, @plate, @vehicle, @vehiclename)",
 			{
 				["@owner"] = xPlayer.identifier,
 				["@plate"] = vehicleProps.plate,

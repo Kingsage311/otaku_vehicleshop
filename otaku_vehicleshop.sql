@@ -42,23 +42,28 @@ INSERT INTO `vehicle_categories` (`name`, `label`) VALUES
 --  ADD COLUMN `vehiclename` varchar(60) NOT NULL;
 
 -- If you already have owned_vehicles comment out the section below and uncomment the 2 lines above
-DROP TABLE IF EXISTS `owned_vehicles`;
-CREATE TABLE IF NOT EXISTS `owned_vehicles` (
-  `vehicle` longtext NOT NULL,
-  `owner` varchar(60) NOT NULL,
-  `stored` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'State of the vehicle',
-  `garage_name` varchar(50) NOT NULL DEFAULT 'Garage_Centre',
-  `houseid` int(11) NOT NULL DEFAULT '0',
-  `pound` tinyint(1) NOT NULL DEFAULT '0',
-  `vehiclename` varchar(50) DEFAULT NULL,
+CREATE TABLE IF NOT EXISTS `player_vehicles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `license` varchar(50) DEFAULT NULL,
+  `citizenid` varchar(50) DEFAULT NULL,
+  `vehicle` varchar(50) DEFAULT NULL,
+  `hash` varchar(50) DEFAULT NULL,
+  `mods` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `plate` varchar(50) NOT NULL,
-  `type` varchar(10) NOT NULL DEFAULT 'car',
-  `job` varchar(50) DEFAULT NULL,
-  `photo` varchar(256) NOT NULL DEFAULT '',
-  PRIMARY KEY (`plate`),
-  KEY `vehsowned` (`owner`),
-  KEY `carOwner` (`owner`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `fakeplate` varchar(50) DEFAULT NULL,
+  `garage` varchar(50) DEFAULT NULL,
+  `fuel` int(11) DEFAULT 100,
+  `engine` float DEFAULT 1000,
+  `body` float DEFAULT 1000,
+  `state` int(11) DEFAULT 1,
+  `depotprice` int(11) NOT NULL DEFAULT 0,
+  `drivingdistance` int(50) DEFAULT NULL,
+  `status` text DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `plate` (`plate`),
+  KEY `citizenid` (`citizenid`),
+  KEY `license` (`license`)
+) ENGINE=InnoDB AUTO_INCREMENT=2432 DEFAULT CHARSET=utf8mb4;
 -- End of owned_vehicles Section!
 
 -- Dumping structure for table strp.vehicles
