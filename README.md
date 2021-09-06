@@ -1,5 +1,7 @@
 # otaku_vehicleshop
 
+# Mainly converted by CPL with help from Winter and Myself
+
 ## Features
 
 - **Buy Vehicles**
