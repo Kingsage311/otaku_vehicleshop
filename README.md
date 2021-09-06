@@ -31,7 +31,7 @@ To run otaku_vehicleshop you will need to be using the following resources;
 Join us on Discord to see our other resources or find help & support for any issues you run into.
 Pull requests and feature requests are always welcome.
 
-Discord: https://discord.gg/EMeDvZ7FVV
+Discord: https://discord.gg/aCFPpcKEGk
 
 For anyone wondering what to do about the hash column in the database just leave it empty the server will auto populate it on startup!
 And for anyone having trouble with the database not wanting to save the vehicle when hash is left empty simply put a 0 in hash and let it save and just remove the 0 right after!
