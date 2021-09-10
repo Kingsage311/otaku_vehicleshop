@@ -184,7 +184,7 @@ QBCore.Functions.CreateCallback(
 		local xPlayer = QBCore.Functions.GetPlayer(source)
 
 		exports.ghmattimysql.executeSync(
-			"SELECT * FROM owned_vehicles WHERE owner = @owner AND @plate = plate",
+			"SELECT * FROM player_vehicles WHERE owner = @owner AND @plate = plate",
 			{
 				["@owner"] = xPlayer.identifier,
 				["@plate"] = plate
@@ -215,7 +215,7 @@ QBCore.Functions.CreateCallback(
 )
 
 QBCore.Functions.CreateCallback("otaku_vehicleshop:isPlateTaken", function(source, cb, plate)
-	exports.ghmattimysql.executeSync("SELECT * FROM owned_vehicles WHERE plate = @plate", { ["@plate"] = plate } ,function(result)
+	exports.ghmattimysql.executeSync("SELECT * FROM player_vehicles WHERE plate = @plate", { ["@plate"] = plate } ,function(result)
 		cb(result[1] ~= nil)
 	end)
 end)
@@ -227,7 +227,7 @@ if Config.PoliceJob then
 			local xPlayer = QBCore.Functions.GetPlayer(source)
 
 			exports.ghmattimysql.executeSync(
-				"SELECT * FROM owned_vehicles WHERE owner = @owner AND type = @type AND job = @job",
+				"SELECT * FROM player_vehicles WHERE owner = @owner AND type = @type AND job = @job",
 				{
 					["@owner"] = xPlayer.identifier,
 					["@type"] = type,
@@ -247,7 +247,7 @@ if Config.PoliceJob then
 			local xPlayer = QBCore.Functions.GetPlayer(source)
 
 			exports.ghmattimysql:execute(
-				"UPDATE owned_vehicles SET `stored` = @stored WHERE plate = @plate AND job = @job",
+				"UPDATE player_vehicles SET `stored` = @stored WHERE plate = @plate AND job = @job",
 				{
 					["@stored"] = state,
 					["@plate"] = plate,
