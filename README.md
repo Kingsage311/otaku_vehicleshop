@@ -26,7 +26,7 @@ To run otaku_vehicleshop you will need to be using the following resources;
 ## Download & Installation
 
 - Import otaku_vehicleshop.sql in your database
-- Add this in your server.cfg: "ensure otaku_vehicleshop"
+- Add this in your server.cfg: "ensure otaku_vehicleshop" (unless you put it inside a folder that is ensured like "ensure [qb]"
 
 ## Help & Support
 
