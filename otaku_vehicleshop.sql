@@ -41,7 +41,6 @@ INSERT INTO `vehicle_categories` (`name`, `label`) VALUES
 -- ALTER TABLE `owned_vehicles`
 --  ADD COLUMN `vehiclename` varchar(60) NOT NULL;
 
--- If you already have owned_vehicles comment out the section below and uncomment the 2 lines above
 CREATE TABLE IF NOT EXISTS `player_vehicles` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `license` varchar(50) DEFAULT NULL,

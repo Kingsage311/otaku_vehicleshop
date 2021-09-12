@@ -3,8 +3,8 @@ local Vehicles = {}
 local shopLoading = true
 
 Citizen.CreateThread(function()
-    Categories = exports.ghmattimysql:executeSync("SELECT * FROM vehicle_categories ORDER BY label ASC")
-    local vehicles = exports.ghmattimysql:executeSync("SELECT * FROM vehicles")
+    Categories = exports.oxmysql:fetchSync("SELECT * FROM vehicle_categories ORDER BY label ASC", {})
+    local vehicles = exports.oxmysql:fetchSync("SELECT * FROM vehicles", {})
     for i = 1, #vehicles, 1 do
         local vehicle = vehicles[i]
         vehicle.loaded = false
@@ -16,7 +16,7 @@ Citizen.CreateThread(function()
         end
         if (vehicle.hash == "" or vehicle.hash == "0") then
             vehicle.hash = GetHashKey(vehicle.model)
-            exports.ghmattimysql:execute("UPDATE vehicles SET hash = @hash WHERE model = @model",
+            exports.oxmysql:execute("UPDATE vehicles SET hash = @hash WHERE model = @model",
                     {
                         ["@hash"] = vehicle.hash,
                         ["@model"] = vehicle.model
@@ -32,7 +32,7 @@ Citizen.CreateThread(function()
 end)
 
 function RemoveOwnedVehicle(plate)
-    exports.ghmattimysql:execute("DELETE FROM player_vehicles WHERE plate = @plate", { ["@plate"] = plate } )
+    exports.oxmysql:execute("DELETE FROM player_vehicles WHERE plate = @plate", { ["@plate"] = plate } )
 end
 
 RegisterServerEvent("otaku_vehicleshop:setVehicleOwned")
@@ -40,7 +40,7 @@ AddEventHandler("otaku_vehicleshop:setVehicleOwned", function(vehicleProps)
 	local xPlayer = QBCore.Functions.GetPlayer(source)
 	local vehicleName = Vehicles[tostring(vehicleProps.model)].name
 
-	exports.ghmattimysql:execute('INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, state) VALUES (@license, @citizenid, @vehicle, @hash, @mods, @plate, @state)',
+	exports.oxmysql:insert('INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, state) VALUES (@license, @citizenid, @vehicle, @hash, @mods, @plate, @state)',
 	{
 		['@license'] = xPlayer.PlayerData.license,
 		['@citizenid'] = xPlayer.PlayerData.citizenid,
@@ -62,7 +62,7 @@ AddEventHandler(
 	function(playerId, vehicleProps)
 		local xPlayer = QBCore.Functions.GetPlayer(playerId)
 
-		exports.ghmattimysql:execute(
+		exports.oxmysql:insert(
 			"INSERT INTO player_vehicles (owner, plate, vehicle, vehiclename) VALUES (@owner, @plate, @vehicle, @vehiclename)",
 			{
 				["@owner"] = xPlayer.identifier,
@@ -97,7 +97,7 @@ AddEventHandler(
 			return
 		end
 
-		exports.ghmattimysql:execute(
+		exports.oxmysql:insert(
 			"INSERT INTO vehicle_sold (client, model, plate, soldby, date) VALUES (@client, @model, @plate, @soldby, @date)",
 			{
 				["@client"] = xTarget.getName(),
@@ -183,8 +183,8 @@ QBCore.Functions.CreateCallback(
 
 		local xPlayer = QBCore.Functions.GetPlayer(source)
 
-		exports.ghmattimysql.executeSync(
-			"SELECT * FROM player_vehicles WHERE owner = @owner AND @plate = plate",
+		exports.oxmysql:fetchSync(
+			"SELECT * FROM owned_vehicles WHERE owner = @owner AND @plate = plate",
 			{
 				["@owner"] = xPlayer.identifier,
 				["@plate"] = plate
@@ -215,7 +215,7 @@ QBCore.Functions.CreateCallback(
 )
 
 QBCore.Functions.CreateCallback("otaku_vehicleshop:isPlateTaken", function(source, cb, plate)
-	exports.ghmattimysql.executeSync("SELECT * FROM player_vehicles WHERE plate = @plate", { ["@plate"] = plate } ,function(result)
+	exports.oxmysql:fetchSync("SELECT * FROM owned_vehicles WHERE plate = @plate", { ["@plate"] = plate } ,function(result)
 		cb(result[1] ~= nil)
 	end)
 end)
@@ -226,8 +226,8 @@ if Config.PoliceJob then
 		function(source, cb, type)
 			local xPlayer = QBCore.Functions.GetPlayer(source)
 
-			exports.ghmattimysql.executeSync(
-				"SELECT * FROM player_vehicles WHERE owner = @owner AND type = @type AND job = @job",
+			exports.oxmysql:fetchSync(
+				"SELECT * FROM owned_vehicles WHERE owner = @owner AND type = @type AND job = @job",
 				{
 					["@owner"] = xPlayer.identifier,
 					["@type"] = type,
@@ -246,8 +246,8 @@ if Config.PoliceJob then
 		function(plate, state)
 			local xPlayer = QBCore.Functions.GetPlayer(source)
 
-			exports.ghmattimysql:execute(
-				"UPDATE player_vehicles SET `stored` = @stored WHERE plate = @plate AND job = @job",
+			exports.oxmysql:execute(
+				"UPDATE owned_vehicles SET `stored` = @stored WHERE plate = @plate AND job = @job",
 				{
 					["@stored"] = state,
 					["@plate"] = plate,
