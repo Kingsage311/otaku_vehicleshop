@@ -141,7 +141,7 @@ QBCore.Functions.CreateCallback(
 
 		local xPlayer = QBCore.Functions.GetPlayer(source)
 
-		exports.oxmysql:fetchSync("SELECT * FROM owned_vehicles WHERE owner = ? AND plate = ?",{xPlayer.identifier, plate}, function(result)
+		exports.oxmysql:fetchSync("SELECT * FROM player_vehicles WHERE owner = ? AND plate = ?",{xPlayer.identifier, plate}, function(result)
 			if result[1] then -- does the owner match?
 				local vehicle = json.decode(result[1].vehicle)
 				if vehicle.model == model then
@@ -166,7 +166,7 @@ QBCore.Functions.CreateCallback(
 )
 
 QBCore.Functions.CreateCallback("otaku_vehicleshop:isPlateTaken", function(source, cb, plate)
-	exports.oxmysql:fetchSync("SELECT * FROM owned_vehicles WHERE plate = ?", {plate} ,function(result)
+	exports.oxmysql:fetchSync("SELECT * FROM player_vehicles WHERE plate = ?", {plate} ,function(result)
 		cb(result[1] ~= nil)
 	end)
 end)
@@ -177,7 +177,7 @@ if Config.PoliceJob then
 		function(source, cb, type)
 			local xPlayer = QBCore.Functions.GetPlayer(source)
 
-			exports.oxmysql:fetchSync("SELECT * FROM owned_vehicles WHERE owner = ? AND type = ? AND job = ?",{xPlayer.identifier, type, xPlayer.job.name}, function(result)
+			exports.oxmysql:fetchSync("SELECT * FROM player_vehicles WHERE owner = ? AND type = ? AND job = ?",{xPlayer.identifier, type, xPlayer.job.name}, function(result)
 				cb(result)
 			end)
 		end
@@ -189,7 +189,7 @@ if Config.PoliceJob then
 		function(plate, state)
 			local xPlayer = QBCore.Functions.GetPlayer(source)
 
-			exports.oxmysql:execute("UPDATE owned_vehicles SET `stored` = ? WHERE plate = ? AND job = ?",{state, plate, xPlayer.job.name}, function(rowsChanged)
+			exports.oxmysql:execute("UPDATE player_vehicles SET `stored` = ? WHERE plate = ? AND job = ?",{state, plate, xPlayer.job.name}, function(rowsChanged)
 				if rowsChanged == 0 then
 					print(("[otaku_vehicleshop] [^3WARNING^7] %s exploited the garage!"):format(xPlayer.identifier))
 				end
