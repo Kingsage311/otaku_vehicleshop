@@ -46,7 +46,7 @@ AddEventHandler(
 	function(playerId, vehicleProps)
 		local xPlayer = QBCore.Functions.GetPlayer(playerId)
 
-		exports.oxmysql:insert("INSERT INTO player_vehicles (owner, plate, vehicle, vehiclename) VALUES (?, ?, ?, ?)",{xPlayer.identifier, vehicleProps.plate, json.encode(vehicleProps), Vehicles[tostring(vehicleProps.model)].name}, function(rowsChanged)
+		exports.oxmysql:insert("INSERT INTO player_vehicles (citizenid, plate, vehicle, vehiclename) VALUES (?, ?, ?, ?)",{xPlayer.identifier, vehicleProps.plate, json.encode(vehicleProps), Vehicles[tostring(vehicleProps.model)].name}, function(rowsChanged)
 			TriggerClientEvent("QBCore:Notify", playerId, "Vehicle Registration", _U("vehicle_belongs", vehicleProps.plate), "fas fa-car", "green", 3)
 		end)
 	end
@@ -141,7 +141,7 @@ QBCore.Functions.CreateCallback(
 
 		local xPlayer = QBCore.Functions.GetPlayer(source)
 
-		exports.oxmysql:fetchSync("SELECT * FROM player_vehicles WHERE owner = ? AND plate = ?",{xPlayer.identifier, plate}, function(result)
+		exports.oxmysql:fetchSync("SELECT * FROM player_vehicles WHERE citizenid = ? AND plate = ?",{xPlayer.identifier, plate}, function(result)
 			if result[1] then -- does the owner match?
 				local vehicle = json.decode(result[1].vehicle)
 				if vehicle.model == model then
@@ -177,7 +177,7 @@ if Config.PoliceJob then
 		function(source, cb, type)
 			local xPlayer = QBCore.Functions.GetPlayer(source)
 
-			exports.oxmysql:fetchSync("SELECT * FROM player_vehicles WHERE owner = ? AND type = ? AND job = ?",{xPlayer.identifier, type, xPlayer.job.name}, function(result)
+			exports.oxmysql:fetchSync("SELECT * FROM player_vehicles WHERE citizenid = ? AND type = ? AND job = ?",{xPlayer.identifier, type, xPlayer.job.name}, function(result)
 				cb(result)
 			end)
 		end
