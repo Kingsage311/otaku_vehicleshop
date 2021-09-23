@@ -86,7 +86,7 @@ RegisterNUICallback("BuyVehicle", function(data, cb)
         if hasEnoughMoney then
             QBCore.Functions.SpawnVehicle(veh.model, function(vehicle)
                 TaskWarpPedIntoVehicle(playerPed, vehicle, -1)
-                local newPlate = string.upper(GetRandomLetter(3) .. " " .. GetRandomNumber(4))
+                local newPlate = string.upper(GetRandomLetter(2) .. GetRandomNumber(2) .. GetRandomLetter(2) .. GetRandomNumber(2))
                 local vehicleProps = QBCore.Functions.GetVehicleProperties(vehicle)
                 vehicleProps.plate = newPlate
                 SetVehicleNumberPlateText(vehicle, newPlate)
