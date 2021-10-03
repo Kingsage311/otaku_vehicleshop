@@ -32,12 +32,13 @@ end
 
 RegisterServerEvent("otaku_vehicleshop:setVehicleOwned")
 AddEventHandler("otaku_vehicleshop:setVehicleOwned", function(vehicleProps)
+	src = source
 	local xPlayer = QBCore.Functions.GetPlayer(source)
 	local vehicleName = Vehicles[tostring(vehicleProps.model)].name
 	local vehicleModel = Vehicles[tostring(vehicleProps.model)].model
 
 	exports.oxmysql:insert('INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, state) VALUES (?, ?, ?, ?, ?, ?, ?)',{xPlayer.PlayerData.license, xPlayer.PlayerData.citizenid, string.lower(vehicleModel), GetHashKey(Vehicles[tostring(vehicleProps.model)].name), json.encode(vehicleProps), vehicleProps.plate, 0}, function(rowsChanged)
-		TriggerClientEvent('QBCore:Notify', -1, "A vehicle with plate: " .. vehicleProps.plate .. " now belongs to you!")
+		TriggerClientEvent('QBCore:Notify', src, "A vehicle with plate: " .. vehicleProps.plate .. " now belongs to you!")
 	end)
 end)
 
