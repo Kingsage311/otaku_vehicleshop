@@ -3,8 +3,8 @@ local Vehicles = {}
 local shopLoading = true
 
 Citizen.CreateThread(function()
-    Categories = exports.oxmysql:fetchSync("SELECT * FROM vehicle_categories ORDER BY label ASC", {})
-    local vehicles = exports.oxmysql:fetchSync("SELECT * FROM vehicles", {})
+    Categories = exports.oxmysql:executeSync("SELECT * FROM vehicle_categories ORDER BY label ASC", {})
+    local vehicles = exports.oxmysql:executeSync("SELECT * FROM vehicles", {})
     for i = 1, #vehicles, 1 do
         local vehicle = vehicles[i]
         vehicle.loaded = false
@@ -143,7 +143,7 @@ QBCore.Functions.CreateCallback(
 
 		local xPlayer = QBCore.Functions.GetPlayer(source)
 
-		exports.oxmysql:fetchSync("SELECT * FROM player_vehicles WHERE citizenid = ? AND plate = ?",{xPlayer.identifier, plate}, function(result)
+		exports.oxmysql:executeSync("SELECT * FROM player_vehicles WHERE citizenid = ? AND plate = ?",{xPlayer.identifier, plate}, function(result)
 			if result[1] then -- does the owner match?
 				local vehicle = json.decode(result[1].vehicle)
 				if vehicle.model == model then
@@ -168,7 +168,7 @@ QBCore.Functions.CreateCallback(
 )
 
 QBCore.Functions.CreateCallback("otaku_vehicleshop:isPlateTaken", function(source, cb, plate)
-	exports.oxmysql:fetchSync("SELECT * FROM player_vehicles WHERE plate = ?", {plate} ,function(result)
+	exports.oxmysql:executeSync("SELECT * FROM player_vehicles WHERE plate = ?", {plate} ,function(result)
 		cb(result[1] ~= nil)
 	end)
 end)
@@ -179,7 +179,7 @@ if Config.PoliceJob then
 		function(source, cb, type)
 			local xPlayer = QBCore.Functions.GetPlayer(source)
 
-			exports.oxmysql:fetchSync("SELECT * FROM player_vehicles WHERE citizenid = ? AND type = ? AND job = ?",{xPlayer.identifier, type, xPlayer.job.name}, function(result)
+			exports.oxmysql:executeSync("SELECT * FROM player_vehicles WHERE citizenid = ? AND type = ? AND job = ?",{xPlayer.identifier, type, xPlayer.job.name}, function(result)
 				cb(result)
 			end)
 		end
