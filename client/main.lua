@@ -1,3 +1,4 @@
+local QBCore = exports['qb-core']:GetCoreObject()
 local HasAlreadyEnteredMarker = false
 local LastZone = nil
 local CurrentAction = nil

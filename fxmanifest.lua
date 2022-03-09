@@ -17,8 +17,9 @@ files {
 
 server_scripts {
 	--"locales/*.lua",
+    '@oxmysql/lib/MySQL.lua', 
 	"config.lua",
-	"server/main.lua"
+    'server/server.lua'
 }
 
 client_scripts {
@@ -34,7 +35,6 @@ exports {
 }
 
 shared_scripts { 
-    '@qb-core/import.lua',
     'config.lua'
 }
 

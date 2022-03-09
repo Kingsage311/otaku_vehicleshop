@@ -1,10 +1,11 @@
+local QBCore = exports['qb-core']:GetCoreObject()
 local Categories = {}
 local Vehicles = {}
 local shopLoading = true
 
 Citizen.CreateThread(function()
-    Categories = exports.oxmysql:executeSync("SELECT * FROM vehicle_categories ORDER BY label ASC", {})
-    local vehicles = exports.oxmysql:executeSync("SELECT * FROM vehicles", {})
+    Categories = MySQL.query.await("SELECT * FROM vehicle_categories ORDER BY label ASC", {})
+    local vehicles = MySQL.query.await("SELECT * FROM vehicles", {})
     for i = 1, #vehicles, 1 do
         local vehicle = vehicles[i]
         vehicle.loaded = false
@@ -16,7 +17,7 @@ Citizen.CreateThread(function()
         end
         if (vehicle.hash == "" or vehicle.hash == "0") then
             vehicle.hash = GetHashKey(vehicle.model)
-            exports.oxmysql:execute("UPDATE vehicles SET hash = ? WHERE model = ?",{vehicle.hash, vehicle.model})
+            MySQL.query("UPDATE vehicles SET hash = ? WHERE model = ?",{vehicle.hash, vehicle.model})
         end
         Vehicles[tostring(vehicle.hash)] = vehicle
     end
@@ -27,7 +28,7 @@ Citizen.CreateThread(function()
 end)
 
 function RemoveOwnedVehicle(plate)
-    exports.oxmysql:execute("DELETE FROM player_vehicles WHERE plate = ?", {plate})
+    MySQL.query("DELETE FROM player_vehicles WHERE plate = ?", {plate})
 end
 
 RegisterServerEvent("otaku_vehicleshop:setVehicleOwned")
@@ -37,7 +38,7 @@ AddEventHandler("otaku_vehicleshop:setVehicleOwned", function(vehicleProps)
 	local vehicleName = Vehicles[tostring(vehicleProps.model)].name
 	local vehicleModel = Vehicles[tostring(vehicleProps.model)].model
 
-	exports.oxmysql:insert('INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, state) VALUES (?, ?, ?, ?, ?, ?, ?)',{xPlayer.PlayerData.license, xPlayer.PlayerData.citizenid, string.lower(vehicleModel), GetHashKey(Vehicles[tostring(vehicleProps.model)].name), json.encode(vehicleProps), vehicleProps.plate, 0}, function(rowsChanged)
+	MySQL.insert('INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, state) VALUES (?, ?, ?, ?, ?, ?, ?)',{xPlayer.PlayerData.license, xPlayer.PlayerData.citizenid, string.lower(vehicleModel), GetHashKey(Vehicles[tostring(vehicleProps.model)].name), json.encode(vehicleProps), vehicleProps.plate, 0}, function(rowsChanged)
 		TriggerClientEvent('QBCore:Notify', src, "A vehicle with plate: " .. vehicleProps.plate .. " now belongs to you!")
 	end)
 end)
@@ -48,7 +49,7 @@ AddEventHandler(
 	function(playerId, vehicleProps)
 		local xPlayer = QBCore.Functions.GetPlayer(playerId)
 
-		exports.oxmysql:insert("INSERT INTO player_vehicles (citizenid, plate, vehicle, vehiclename) VALUES (?, ?, ?, ?)",{xPlayer.identifier, vehicleProps.plate, json.encode(vehicleModel), Vehicles[tostring(vehicleProps.model)].name}, function(rowsChanged)
+		MySQL.insert("INSERT INTO player_vehicles (citizenid, plate, vehicle, vehiclename) VALUES (?, ?, ?, ?)",{xPlayer.identifier, vehicleProps.plate, json.encode(vehicleModel), Vehicles[tostring(vehicleProps.model)].name}, function(rowsChanged)
 			TriggerClientEvent("QBCore:Notify", playerId, "Vehicle Registration", _U("vehicle_belongs", vehicleProps.plate), "fas fa-car", "green", 3)
 		end)
 	end
@@ -66,7 +67,7 @@ AddEventHandler(
 			return
 		end
 
-		exports.oxmysql:insert("INSERT INTO vehicle_sold (client, model, plate, soldby, date) VALUES (?, ?, ?, ?, ?)",{xTarget.getName(), model, plate, xPlayer.getName(), dateNow})
+		MySQL.insert("INSERT INTO vehicle_sold (client, model, plate, soldby, date) VALUES (?, ?, ?, ?, ?)",{xTarget.getName(), model, plate, xPlayer.getName(), dateNow})
 	end
 )
 
@@ -143,7 +144,7 @@ QBCore.Functions.CreateCallback(
 
 		local xPlayer = QBCore.Functions.GetPlayer(source)
 
-		exports.oxmysql:executeSync("SELECT * FROM player_vehicles WHERE citizenid = ? AND plate = ?",{xPlayer.identifier, plate}, function(result)
+		MySQL.query.await("SELECT * FROM player_vehicles WHERE citizenid = ? AND plate = ?",{xPlayer.identifier, plate}, function(result)
 			if result[1] then -- does the owner match?
 				local vehicle = json.decode(result[1].vehicle)
 				if vehicle.model == model then
@@ -168,7 +169,7 @@ QBCore.Functions.CreateCallback(
 )
 
 QBCore.Functions.CreateCallback("otaku_vehicleshop:isPlateTaken", function(source, cb, plate)
-	exports.oxmysql:executeSync("SELECT * FROM player_vehicles WHERE plate = ?", {plate} ,function(result)
+	MySQL.query.await("SELECT * FROM player_vehicles WHERE plate = ?", {plate} ,function(result)
 		cb(result[1] ~= nil)
 	end)
 end)
@@ -179,7 +180,7 @@ if Config.PoliceJob then
 		function(source, cb, type)
 			local xPlayer = QBCore.Functions.GetPlayer(source)
 
-			exports.oxmysql:executeSync("SELECT * FROM player_vehicles WHERE citizenid = ? AND type = ? AND job = ?",{xPlayer.identifier, type, xPlayer.job.name}, function(result)
+			MySQL.query.await("SELECT * FROM player_vehicles WHERE citizenid = ? AND type = ? AND job = ?",{xPlayer.identifier, type, xPlayer.job.name}, function(result)
 				cb(result)
 			end)
 		end
@@ -191,7 +192,7 @@ if Config.PoliceJob then
 		function(plate, state)
 			local xPlayer = QBCore.Functions.GetPlayer(source)
 
-			exports.oxmysql:execute("UPDATE player_vehicles SET `stored` = ? WHERE plate = ? AND job = ?",{state, plate, xPlayer.job.name}, function(rowsChanged)
+			MySQL.query("UPDATE player_vehicles SET `stored` = ? WHERE plate = ? AND job = ?",{state, plate, xPlayer.job.name}, function(rowsChanged)
 				if rowsChanged == 0 then
 					print(("[otaku_vehicleshop] [^3WARNING^7] %s exploited the garage!"):format(xPlayer.identifier))
 				end
